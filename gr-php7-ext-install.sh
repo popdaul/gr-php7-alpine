@@ -1,0 +1,54 @@
+#!/bin/sh
+
+export MC="-j$(nproc)";
+
+cd /tmp/pkg;
+# echo "---------- Install pdo_odbc ----------";
+# docker-php-ext-install ${MC} pdo_odbc;
+# echo "---------- Install igbinary ----------";
+# printf "\n" | pecl install igbinary;
+# docker-php-ext-enable igbinary;
+echo "---------- Install ldap ----------";
+apk add --no-cache ldb-dev;
+apk add --no-cache openldap-dev;
+docker-php-ext-install ${MC} ldap;
+echo "---------- Install mcrypt ----------";
+apk add --no-cache libmcrypt-dev; \
+docker-php-ext-install ${MC} mcrypt;
+# echo "---------- Install memcached ----------";
+# apk add --no-cache libmemcached-dev zlib-dev;
+# pecl install memcached-3.1.3;
+# docker-php-ext-enable memcached;
+echo "---------- Install mongodb ----------";
+mkdir mongodb;
+tar -zxf /tmp/pkg/mongodb-1.5.5.tgz -C mongodb --strip-components=1;
+cd mongodb && phpize && ./configure && make ${MC} && make install;
+docker-php-ext-enable mongodb;
+cd /tmp/pkg;
+echo "---------- Install redis ----------";
+mkdir redis;
+tar -zxf /tmp/pkg/redis-5.0.2.tgz -C redis --strip-components=1;
+cd redis && phpize && ./configure && make ${MC} && make install;
+docker-php-ext-enable redis;
+cd /tmp/pkg;
+echo "---------- Install xdebug ----------";
+mkdir xdebug;
+tar -zxf /tmp/pkg/xdebug-2.6.1.tgz -C xdebug --strip-components=1;
+cd xdebug && phpize && ./configure && make ${MC} && make install;
+docker-php-ext-enable xdebug;
+cd /tmp/pkg;
+echo "---------- Install yaml ----------";
+tar -zxf yaml-0.2.2.tar.gz;
+(cd yaml-0.2.2 && ./configure && make && make install);
+mkdir yaml;
+tar -zxf /tmp/pkg/yaml-2.0.4.tgz -C yaml --strip-components=1;
+cd yaml && phpize && ./configure && make ${MC} && make install;
+docker-php-ext-enable yaml;
+cd /tmp/pkg;
+echo "---------- Install cphalcon ----------";
+tar -zxf cphalcon-3.2.2.tgz;
+(cd cphalcon-3.2.2/build/php7/64bits && phpize && ./configure && make ${MC} && make install);
+docker-php-ext-enable phalcon;
+cd /tmp/pkg;
+cd /;
+rm -rf /tmp/pkg;
